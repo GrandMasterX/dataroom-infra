@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.0
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      # -backend=false: validation is about the configuration being sound, and it must not
+      # need credentials or touch remote state. An apply is a deliberate human action.
+      - name: Validate each stack
+        run: |
+          for stack in bootstrap envs/prod; do
+            echo "::group::$stack"
+            terraform -chdir="$stack" init -backend=false -input=false
+            terraform -chdir="$stack" validate
+            echo "::endgroup::"
+          done

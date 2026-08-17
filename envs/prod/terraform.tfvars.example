@@ -1,0 +1,7 @@
+# Copy to terraform.tfvars (gitignored) and fill in.
+# The Vercel domain is required for uploads to work from the deployed app; localhost is kept
+# so the same bucket can be used while reproducing something locally.
+allowed_origins = [
+  "http://localhost:3000",
+  "https://<your-app>.vercel.app",
+]
