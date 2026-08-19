@@ -58,6 +58,13 @@ read back buckets under that prefix, and manage an IAM user under `user/dataroom
 inline policy and an access key. Scoping it to the prefix is what stops this identity from
 reaching anything else in the account, and it cannot widen its own policy.
 
+The state bucket's name is committed in `backend.tf`, and that is deliberate in a public
+repository: a bucket name is not a credential. Everything about the bucket is closed to anyone
+without IAM permission on it — public access blocked, no ACLs, and a policy that refuses plain
+HTTP. Anonymous list, read and write all answer 403, checked rather than assumed. Keeping the
+name in source is what makes `terraform init` work from a fresh clone; the alternative,
+passing it through `-backend-config`, hides a value that protects nothing by being hidden.
+
 `bootstrap/`'s local state file is not committed. Losing it is recoverable rather than an
 emergency — the stack creates one bucket whose name is known, so
 `terraform import aws_s3_bucket.state <name>` brings it back. That is why the stack is kept
