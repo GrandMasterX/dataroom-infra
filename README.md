@@ -1,11 +1,14 @@
 # Data Room — infrastructure
 
-Terraform for the AWS side: the bucket documents live in, and the identity the API uses to
-sign URLs for it.
+Terraform for the AWS side of a virtual data room: the bucket documents live in, and the
+identity the application uses to sign upload and download URLs for it.
 
-The project's design decisions live in the
-**[dataroom-api README](https://github.com/GrandMasterX/dataroom-api)**, which is the entry
-point.
+This README covers the infrastructure — what is in Terraform, what deliberately is not, how
+to apply it, and the decisions that are easy to get wrong.
+
+Related repositories, each documented on its own: the API in
+[dataroom-api](https://github.com/GrandMasterX/dataroom-api) and the interface in
+[dataroom-web](https://github.com/GrandMasterX/dataroom-web).
 
 ## What is here, and what is not
 
@@ -50,8 +53,10 @@ terraform apply
 terraform output -raw s3_secret_access_key     # into the API's environment
 ```
 
-Needs credentials with S3 and IAM permissions scoped to `dataroom-*`; the setup notes in the
-main project list the exact policy.
+Needs credentials with S3 and IAM permissions scoped to `dataroom-*`: create, configure and
+read back buckets under that prefix, and manage an IAM user under `user/dataroom-*` with an
+inline policy and an access key. Scoping it to the prefix is what stops this identity from
+reaching anything else in the account, and it cannot widen its own policy.
 
 `bootstrap/`'s local state file is not committed. Losing it is recoverable rather than an
 emergency — the stack creates one bucket whose name is known, so
@@ -87,3 +92,16 @@ state: there is no static key to store. Rotation is
 
 Formatting and validation on every push, with `-backend=false` so validation needs no
 credentials and never touches remote state. Applying stays a deliberate human action.
+
+## Where AI was used
+
+This infrastructure was written with Claude Code, and the two decisions above that are easy
+to get wrong — the encryption-header deny rule and `s3:ListBucket` — are both cases where the
+first suggestion was to add them because they sound like hardening. One would have turned
+every browser upload into a 403; the other would have widened what a leaked key can read for
+no working feature. Both were settled by checking what the browser actually sends and what
+the application actually calls, rather than by argument.
+
+Agent instructions specific to this repository live in `.claude/skills/` — the Terraform
+conventions and the S3 presigned-upload rules that the bucket configuration has to satisfy.
+
