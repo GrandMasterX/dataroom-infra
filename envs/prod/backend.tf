@@ -9,7 +9,7 @@ terraform {
    * `terraform init` here.
    */
   backend "s3" {
-    # bucket       = "dataroom-tfstate-<suffix>"
+    bucket       = "dataroom-tfstate-9382bf2e"
     key          = "prod/terraform.tfstate"
     region       = "eu-west-1"
     encrypt      = true

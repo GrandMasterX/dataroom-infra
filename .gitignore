@@ -1,9 +1,13 @@
 # Local state of the bootstrap stack: it holds the state bucket's identity and must
-# never be committed. Recreating the bucket by hand is a five-minute job — see
-# bootstrap/README.md.
+# never be committed. Losing it is recoverable — see "Applying it" in README.md.
 bootstrap/.terraform/
 bootstrap/terraform.tfstate*
 **/.terraform/
 *.tfvars
 !*.tfvars.example
 .DS_Store
+
+# Saved plan files: they embed resolved values from the current state and are only
+# meaningful for the apply they were generated for.
+tfplan
+*.tfplan
